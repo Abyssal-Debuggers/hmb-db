@@ -1,0 +1,31 @@
+name: Build go
+
+on:
+    workflow_call:
+        inputs:
+            version:
+                required: true
+                type: string
+                description: "tags for docker images"
+
+jobs:
+    generate:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+            - name: Set up Go
+              uses: actions/setup-go@v4
+              with:
+                  go-version: ">=1.20.0"
+            - name: Install dependencies
+              run: |
+                  go install github.com/go-jet/jet/v2/cmd/jet@latest
+            - name: Generate
+              run: |
+                  go generate
+            - name: Commit & Push changes
+              uses: actions-js/push@master
+              with:
+                  message: "generate: reversioning ${{ inputs.version }}"
+                  github_token: ${{ secrets.GITHUB_TOKEN }}

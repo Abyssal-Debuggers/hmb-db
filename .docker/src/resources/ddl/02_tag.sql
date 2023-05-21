@@ -1,0 +1,1 @@
+   create table hmb.tag (tag varchar(255) primary key);
