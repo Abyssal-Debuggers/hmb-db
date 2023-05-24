@@ -1,4 +1,4 @@
-module github.com/egoavara/hmb-db
+module github.com/Abyssal-Debuggers/hmb-db
 
 go 1.20
 
