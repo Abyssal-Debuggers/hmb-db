@@ -38,4 +38,10 @@ jobs:
                   cluster_name: ${{ secrets.GKE_CLUSTER_NAME }}
                   location: ${{ secrets.GKE_LOCATION }}
             - name: Kubernetest Apply
-              run: kubectl apply -f ./.k8s/deploy.yml
+              run: |
+                  if [[ "${{ inputs.type }}" == "latest" ]]; then
+                    sed -i 's/{{IMAGE}}/ghcr.io\/abyssal-debuggers\/hmb-db:latest/' ./.k8s/deploy.yml
+                  elif [[ "${{ inputs.type }}" == "manual" ]]; then
+                    sed -i 's/{{IMAGE}}/ghcr.io\/abyssal-debuggers\/hmb-db:${{ inputs.version }}/' ./.k8s/deploy.yml
+                  fi
+                  kubectl apply -f ./.k8s/deploy.yml

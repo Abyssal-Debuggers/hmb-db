@@ -13,7 +13,7 @@ spec:
         spec:
             containers:
                 - name: hmb-db
-                  image: ghcr.io/egoavara/hmb-db:0.0.7
+                  image: "{{IMAGE}}"
                   resources:
                       requests:
                           memory: "64Mi"
