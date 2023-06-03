@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: hmb-db
+spec:
+    selector:
+        matchLabels:
+            app: hmb-db
+    template:
+        metadata:
+            labels:
+                app: hmb-db
+        spec:
+            containers:
+                - name: hmb-db
+                  image: ghcr.io/egoavara/hmb-db:0.0.7
+                  resources:
+                      requests:
+                          memory: "64Mi"
+                          cpu: "250m"
+                      limits:
+                          memory: "128Mi"
+                          cpu: "500m"
+                  ports:
+                      - containerPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+    name: hmb-db
+spec:
+    selector:
+        app: hmb-db
+    ports:
+        - port: 80
