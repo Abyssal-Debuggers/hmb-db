@@ -32,4 +32,4 @@ spec:
     selector:
         app: hmb-db
     ports:
-        - port: 80
+        - port: 5432
