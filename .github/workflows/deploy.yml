@@ -46,9 +46,9 @@ jobs:
               id: image_version
               run: |
                   if [[ "${{ inputs.type }}" == "latest" ]]; then
-                    echo "version=ghcr.io/abyssal-debuggers/hmb-svr:latest" >> "$GITHUB_OUTPUT"
+                    echo "version=ghcr.io/abyssal-debuggers/hmb-db:latest" >> "$GITHUB_OUTPUT"
                   elif [[ "${{ inputs.type }}" == "manual" ]]; then
-                    echo "version=ghcr.io/abyssal-debuggers/hmb-svr:${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+                    echo "version=ghcr.io/abyssal-debuggers/hmb-db:${{ inputs.version }}" >> "$GITHUB_OUTPUT"
                   fi
             - name: "Setup Terraform variables"
               run: |
@@ -64,6 +64,7 @@ jobs:
                   echo 'postgres_username = "${{ secrets.POSTGRES_USERNAME }}"'               >> ./config.tfvars
                   echo 'postgres_password = "${{ secrets.POSTGRES_PASSWORD }}"'               >> ./config.tfvars
 
+                  echo 'database_image = "${{ steps.image_version.outputs.version }}"'        >> ./config.tfvars
             - name: "Terraform Apply"
               run: |
                   # 
