@@ -1,12 +1,15 @@
 name: Deploy
 
 on:
+    schedule:
+        - cron: "0 16 * * 1-5" # 평일 저녁 4시
+        - cron: "0 10 * * 0,6" # 주말 아침 10시
     workflow_dispatch:
         inputs:
             type:
                 type: choice
                 required: true
-                default: next-patch
+                default: latest
                 description: "Versioning type"
                 options:
                     - "latest"
@@ -28,20 +31,43 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v3
             - name: "Authenticate to Google Cloud"
-              uses: "google-github-actions/auth@v0.4.0"
+              uses: "google-github-actions/auth@v1"
               with:
                   workload_identity_provider: ${{ secrets.GKE_WORKLOAD_IDENTITY_PROVIDER}}
                   service_account: ${{ secrets.GKE_SERVICE_ACCOUNT }}
-            - name: GKE setup
-              uses: google-github-actions/get-gke-credentials@v0.4.0
+            - name: "Setup Terraform"
+              uses: hashicorp/setup-terraform@v2
+            - name: "Setup GKE"
+              uses: google-github-actions/get-gke-credentials@v1
               with:
                   cluster_name: ${{ secrets.GKE_CLUSTER_NAME }}
                   location: ${{ secrets.GKE_LOCATION }}
-            - name: Kubernetest Apply
+            - name: "Let Image-Version"
+              id: image_version
               run: |
                   if [[ "${{ inputs.type }}" == "latest" ]]; then
-                    sed -i 's/{{IMAGE}}/ghcr.io\/abyssal-debuggers\/hmb-db:latest/' ./.k8s/deploy.yml
+                    echo "version=ghcr.io/abyssal-debuggers/hmb-svr:latest" >> "$GITHUB_OUTPUT"
                   elif [[ "${{ inputs.type }}" == "manual" ]]; then
-                    sed -i 's/{{IMAGE}}/ghcr.io\/abyssal-debuggers\/hmb-db:${{ inputs.version }}/' ./.k8s/deploy.yml
+                    echo "version=ghcr.io/abyssal-debuggers/hmb-svr:${{ inputs.version }}" >> "$GITHUB_OUTPUT"
                   fi
-                  kubectl apply -f ./.k8s/deploy.yml
+            - name: "Setup Terraform variables"
+              run: |
+                  echo 'gcp_project = "${{ secrets.GCP_PROJECT }}"'                           >> ./config.tfvars
+                  echo 'gcp_region = "${{ vars.GCP_REGION }}"'                                >> ./config.tfvars
+                  echo 'gcp_zone = "${{ vars.GCP_ZONE }}"'                                    >> ./config.tfvars
+
+                  echo "kubernetes_config_path = \"$KUBECONFIG\""                             >> ./config.tfvars
+                  echo "kubernetes_config_context = \"$(kubectl config current-context)\""    >> ./config.tfvars
+
+                  echo 'postgres_port = ${{vars.POSTGRES_PORT}}'                              >> ./config.tfvars
+                  echo 'postgres_database = "${{ vars.POSTGRES_DATABASE }}"'                  >> ./config.tfvars
+                  echo 'postgres_username = "${{ secrets.POSTGRES_USERNAME }}"'               >> ./config.tfvars
+                  echo 'postgres_password = "${{ secrets.POSTGRES_PASSWORD }}"'               >> ./config.tfvars
+
+            - name: "Terraform Apply"
+              run: |
+                  # 
+                  cd .deploy
+                  #          
+                  terraform init
+                  terraform apply -var-file ../config.tfvars -auto-approve

@@ -14,10 +14,30 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
+# Added by cargo
+target
+/Dockerfile*
 
-# Go workspace file
-go.work
+/config.json
+/.env
 
-!.docker/src/resources/**
+#########################
+# Terraform
+**/.terraform/*
+
+*.tfstate
+*.tfstate.*
+
+crash.log
+crash.*.log
+
+*.tfvars
+*.tfvars.json
+
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+.terraformrc
+terraform.rc

@@ -1,0 +1,7 @@
+kubernetes_config_path    = "<your kubernetes config file here>"
+kubernetes_config_context = "<your kubernetes context here>"
+
+postgres_port     = 5432
+postgres_database = "postgres"
+postgres_username = "postgres"
+# postgres_password = ""
