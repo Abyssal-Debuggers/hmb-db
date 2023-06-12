@@ -37,6 +37,6 @@ jobs:
                   context: .docker
                   push: true
                   build-args: |
-                      POSTGRES_PASSWORD=${{ secrets.ROOT_DB_PASSWORD }}
+                      POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
                   tags: ${{ steps.meta.outputs.tags }}
                   labels: ${{ steps.meta.outputs.labels }}
